@@ -22,17 +22,17 @@ def create_random_image(path, size=(512, 512), seed=42):
 
 def create_circle_on_image(image_path,
                            output_path,
-                           center: tuple[float, float] = None, # (h, k)
-                           radius = 5,  # r
+                           center: tuple[float, float] = None,  # (h, k)
+                           radius=5,  # r
                            seed=42
                            ):
 
     img = Image.open(image_path).convert("RGB")
-    img_arr = np.array(img, dtype=np.uint8) # (H, W, 3)
+    img_arr = np.array(img, dtype=np.uint8)  # (H, W, 3)
     H, W = img_arr.shape[:-1]
 
     if not center:
-        
+
         h = float(random.randint(0, H-1))
         k = float(random.randint(0, H-1))
         center = (h, k)
@@ -64,11 +64,10 @@ def create_circle_on_image(image_path,
     dist2 = (xs - cx)**2 + (ys - cy)**2
     circle_area = dist2 <= (r * r)
 
-
     # apply white color (255) to circle area (pixels)
     img_arr[circle_area] = 255
 
-    filename = f"defect_circle_{image_path.split('/')[-1]}"
+    filename = f"defect_circle_{os.path.basename(image_path)}"
     output_filename = os.path.join(output_path, filename)
     Image.fromarray(img_arr).save(output_filename)
 
@@ -77,7 +76,8 @@ def create_circle_on_image(image_path,
 
 def create_ellipse_on_image(image_path,
                             output_path,
-                            center: tuple[float, float] = None,  # (h, k) i.e. (cx, cy)
+                            # (h, k) i.e. (cx, cy)
+                            center: tuple[float, float] = None,
                             radius_x: float = None,  # rx (half-width)
                             radius_y: float = None,  # ry (half-height)
                             min_radius: int = 5,
@@ -150,11 +150,14 @@ def create_ellipse_on_image(image_path,
 
 def create_circle_ellipse_merged_on_image(image_path,
                                           output_path,
-                                          center: tuple[float, float] = None,  # center for ellipse (cx,cy)
+                                          # center for ellipse (cx,cy)
+                                          center: tuple[float, float] = None,
                                           ellipse_rx: float = None,
                                           ellipse_ry: float = None,
                                           circle_radius: float = None,
-                                          circle_offset: tuple[float, float] = None,  # (dx, dy) relative to ellipse center
+                                          # (dx, dy) relative to ellipse center
+                                          circle_offset: tuple[float,
+                                                               float] = None,
                                           min_radius: int = 5,
                                           seed: int = 42):
     """
@@ -192,12 +195,12 @@ def create_circle_ellipse_merged_on_image(image_path,
     max_ry = max(max_top, max_bottom)
 
     if ellipse_rx is None:
-        ellipse_rx = float(random.uniform(min_radius, max( min_radius, max_rx )))
+        ellipse_rx = float(random.uniform(min_radius, max(min_radius, max_rx)))
     else:
         ellipse_rx = float(ellipse_rx)
 
     if ellipse_ry is None:
-        ellipse_ry = float(random.uniform(min_radius, max( min_radius, max_ry )))
+        ellipse_ry = float(random.uniform(min_radius, max(min_radius, max_ry)))
     else:
         ellipse_ry = float(ellipse_ry)
 
@@ -278,9 +281,8 @@ def generate_random_filename(seed=42):
     return f"image_{''.join(random.choice(values) for _ in range(10))}.png"
 
 
-
 if __name__ == "__main__":
-    image_folder  = "images/"
+    image_folder = "images/"
     output_folder = "defect_shapes/"
     os.makedirs(image_folder, exist_ok=True)
     os.makedirs(output_folder, exist_ok=True)
@@ -289,11 +291,14 @@ if __name__ == "__main__":
         print(f"Generating {i+1} image")
         image = create_random_image(image_folder, seed=random_seed)
         print("Base image", image)
-        
-        circle_defect_img = create_circle_on_image(image, output_folder, radius=random.randint(15, 70), seed=random_seed)
 
-        ellipse_defect_img = create_ellipse_on_image(image, output_folder, radius_x=random.randint(15, 40), radius_y=random.randint(25, 70), seed=random_seed)
+        circle_defect_img = create_circle_on_image(
+            image, output_folder, radius=random.randint(15, 70), seed=random_seed)
 
-        mixed_defect_img = create_circle_ellipse_merged_on_image(image, output_folder, ellipse_rx=random.randint(15, 40), ellipse_ry=random.randint(40, 70), circle_radius=random.randint(30, 80), circle_offset=(15, 30), seed=random_seed)
+        ellipse_defect_img = create_ellipse_on_image(image, output_folder, radius_x=random.randint(
+            15, 40), radius_y=random.randint(25, 70), seed=random_seed)
+
+        mixed_defect_img = create_circle_ellipse_merged_on_image(image, output_folder, ellipse_rx=random.randint(
+            15, 40), ellipse_ry=random.randint(40, 70), circle_radius=random.randint(30, 80), circle_offset=(15, 30), seed=random_seed)
 
         time.sleep(1)
